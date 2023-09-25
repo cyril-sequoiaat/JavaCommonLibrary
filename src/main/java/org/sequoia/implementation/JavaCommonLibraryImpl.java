@@ -39,6 +39,93 @@ public class JavaCommonLibraryImpl implements JavaCommonLibrary
 		return mapValue;
 	}
 
+	@Override
+	public Map<String, Object> convertMapKeysToSnakeCase(Map<String, Object> inputObject)
+	{
+		if (isNotEmpty(inputObject))
+		{
+			Map<String, Object> formattedObject = new HashMap<>();
+			try
+			{
+				if (isNotEmpty(inputObject))
+				{
+					for (Map.Entry<String, Object> entry : inputObject.entrySet())
+					{
+						String key = entry.getKey();
+						Object value = entry.getValue();
+						key = convertToSnakeCase(key);
+						if (isNotEmpty(value))
+						{
+							if (value instanceof Map)
+							{
+								value = convertMapKeysToSnakeCase((Map<String, Object>) value);
+							} else if (value instanceof List)
+							{
+								List list = (List) value;
+								for (int i = 0; i < list.size(); i++)
+								{
+									Object innerObject = list.get(i);
+									if (innerObject instanceof Map)
+									{
+										value = convertMapKeysToSnakeCase(inputObject);
+									}
+								}
+
+							}
+						}
+						formattedObject.put(key, value);
+					}
+				}
+				return formattedObject;
+			}
+			catch(Exception exception)
+			{
+				System.out.println(exception.getMessage());
+				return formattedObject;
+			}
+		}
+		else
+		{
+			throw new NullPointerException("Invalid input");
+		}
+	}
+
+	@Override
+	public String convertToPascalCase(String value)
+	{
+		if (isNotEmpty(value))
+		{
+			final String WORD_SEPARATOR = " ";
+			return Arrays.stream(value.split(WORD_SEPARATOR))
+					.map(word -> isNotEmpty(word)
+							? Character.toTitleCase(word.charAt(0)) + word.substring(1).toLowerCase()
+							: value)
+					.collect(Collectors.joining(WORD_SEPARATOR));
+		}
+		else
+		{
+			throw new NullPointerException("Invalid input");
+		}
+	}
+
+	@Override
+	public String convertToSnakeCase(String value)
+	{
+		if (isNotEmpty(value))
+		{
+			final Pattern STRING_TO_SNAKE_CASE_PATTERN = Pattern.compile("([a-z])([A-Z])");
+			return STRING_TO_SNAKE_CASE_PATTERN.matcher(value)
+					.replaceAll("$1_$2")
+					.toLowerCase()
+					.replaceAll("-", "_")
+					.replaceAll(" ", "_");
+		}
+		else
+		{
+			throw new NullPointerException("Invalid input");
+		}
+	}
+
 	/**
 	 * @param sourceObject source object
 	 * @param typeReference target class type
@@ -189,8 +276,7 @@ public class JavaCommonLibraryImpl implements JavaCommonLibrary
 			}
 			else if(value instanceof String)
 			{
-				return !"".equalsIgnoreCase(((String) value).trim()) || !((String) value).isBlank() ||
-						!((String) value).isEmpty() || !"null".equalsIgnoreCase(String.valueOf(value).trim());
+				return !((String) value).isBlank();
 			}
 			else if(value instanceof Boolean)
 			{
@@ -289,93 +375,6 @@ public class JavaCommonLibraryImpl implements JavaCommonLibrary
 		if (isNotEmpty(jsonInput))
 		{
 			return new JSONObject(jsonInput).toString().getBytes();
-		}
-		else
-		{
-			throw new NullPointerException("Invalid input");
-		}
-	}
-
-	@Override
-	public String convertToSnakeCase(String value)
-	{
-		if (isNotEmpty(value))
-		{
-			final Pattern STRING_TO_SNAKE_CASE_PATTERN = Pattern.compile("([a-z])([A-Z])");
-			return STRING_TO_SNAKE_CASE_PATTERN.matcher(value)
-					.replaceAll("$1_$2")
-					.toLowerCase()
-					.replaceAll("-", "_")
-					.replaceAll(" ", "_");
-		}
-		else
-		{
-			throw new NullPointerException("Invalid input");
-		}
-	}
-
-	@Override
-	public Map<String, Object> convertMapKeysToSnakeCase(Map<String, Object> inputObject)
-	{
-		if (isNotEmpty(inputObject))
-		{
-			Map<String, Object> formattedObject = new HashMap<>();
-			try
-			{
-				if (isNotEmpty(inputObject))
-				{
-					for (Map.Entry<String, Object> entry : inputObject.entrySet())
-					{
-						String key = entry.getKey();
-						Object value = entry.getValue();
-						key = convertToSnakeCase(key);
-						if (isNotEmpty(value))
-						{
-							if (value instanceof Map)
-							{
-								value = convertMapKeysToSnakeCase((Map<String, Object>) value);
-							} else if (value instanceof List)
-							{
-								List list = (List) value;
-								for (int i = 0; i < list.size(); i++)
-								{
-									Object innerObject = list.get(i);
-									if (innerObject instanceof Map)
-									{
-										value = convertMapKeysToSnakeCase(inputObject);
-									}
-								}
-
-							}
-						}
-						formattedObject.put(key, value);
-					}
-				}
-				return formattedObject;
-			}
-			catch(Exception exception)
-			{
-				System.out.println(exception.getMessage());
-				return formattedObject;
-			}
-		}
-		else
-		{
-			throw new NullPointerException("Invalid input");
-		}
-	}
-
-	@Override
-	public String convertToPascalCase(String value)
-	{
-		if (isNotEmpty(value))
-		{
-			final String WORD_SEPARATOR = " ";
-			return Arrays.stream(value.split(WORD_SEPARATOR))
-					.map(word -> isNotEmpty(word)
-							? Character.toTitleCase(word.charAt(0)) + word.substring(1).toLowerCase()
-							: value)
-					.collect(Collectors.joining(WORD_SEPARATOR));
 		}
 		else
 		{
