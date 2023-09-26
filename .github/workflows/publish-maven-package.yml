@@ -2,7 +2,7 @@ name: Publish Java Common Library package
 on: push
 jobs:
   publish:
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
